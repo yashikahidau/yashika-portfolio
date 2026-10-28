@@ -214,9 +214,9 @@ export function PrecisionOrbitalPoster() {
     if (!context) return;
 
     const rings = [
-      { rx: 112, ry: 38, phase: 0, duration: 25, direction: 1, tiltX: 70, tiltY: 0, tiltZ: 0 },
-      { rx: 104, ry: 34, phase: Math.PI * 0.62, duration: 35, direction: 1, tiltX: 60, tiltY: 40, tiltZ: -30 },
-      { rx: 96, ry: 30, phase: Math.PI * 1.08, duration: 45, direction: -1, tiltX: 50, tiltY: -50, tiltZ: 45 },
+      { rx: 108, ry: 36, rotation: 0, phase: 0, direction: 1, node: "circle", color: "#F0D98C" },
+      { rx: 108, ry: 36, rotation: Math.PI / 3, phase: Math.PI * 0.62, direction: 1, node: "square", color: "#66E2A3" },
+      { rx: 108, ry: 36, rotation: -Math.PI / 3, phase: Math.PI * 1.08, direction: 1, node: "circle", color: "#B59CFF" },
     ] as const;
 
     let frame = 0;
@@ -238,44 +238,33 @@ export function PrecisionOrbitalPoster() {
     resizeObserver.observe(canvas);
     resize();
 
-    const project = (ring: (typeof rings)[number], angle: number, pointerTilt: { x: number; y: number }, phase: number) => {
+    const project = (ring: (typeof rings)[number], angle: number, pointerTilt: { x: number; y: number }, orbitPhase: number) => {
       let x = ring.rx * Math.cos(angle);
       let y = ring.ry * Math.sin(angle);
       let z = 0;
 
-      const rotateZ = (degrees: number) => {
-        const radians = (degrees * Math.PI) / 180;
-        const cosine = Math.cos(radians);
-        const sine = Math.sin(radians);
-        const nextX = x * cosine - y * sine;
-        y = x * sine + y * cosine;
-        x = nextX;
-      };
-      const rotateX = (degrees: number) => {
-        const radians = (degrees * Math.PI) / 180;
-        const cosine = Math.cos(radians);
-        const sine = Math.sin(radians);
-        const nextY = y * cosine - z * sine;
-        z = y * sine + z * cosine;
-        y = nextY;
-      };
-      const rotateY = (degrees: number) => {
-        const radians = (degrees * Math.PI) / 180;
-        const cosine = Math.cos(radians);
-        const sine = Math.sin(radians);
-        const nextX = x * cosine + z * sine;
-        z = -x * sine + z * cosine;
-        x = nextX;
-      };
+      const fixedRotation = ring.rotation + orbitPhase * 0.12 * ring.direction;
+      const fixedCosine = Math.cos(fixedRotation);
+      const fixedSine = Math.sin(fixedRotation);
+      const rotatedX = x * fixedCosine - y * fixedSine;
+      y = x * fixedSine + y * fixedCosine;
+      x = rotatedX;
 
-      rotateZ(ring.tiltZ + (phase * 180 / Math.PI) * 0.08);
-      rotateY(ring.tiltY);
-      rotateX(ring.tiltX);
+      const tiltRadiansX = pointerTilt.y * 0.055;
+      const tiltRadiansY = pointerTilt.x * 0.065;
+      const cosX = Math.cos(tiltRadiansX);
+      const sinX = Math.sin(tiltRadiansX);
+      const nextY = y * cosX - z * sinX;
+      z = y * sinX + z * cosX;
+      y = nextY;
 
-      rotateY(pointerTilt.x * 3.5);
-      rotateX(pointerTilt.y * -3.5);
+      const cosY = Math.cos(tiltRadiansY);
+      const sinY = Math.sin(tiltRadiansY);
+      const nextX = x * cosY + z * sinY;
+      z = -x * sinY + z * cosY;
+      x = nextX;
 
-      const perspective = 1 / (1 + z / 520);
+      const perspective = 720 / (720 + z);
       return { x: 150 + x * perspective, y: 150 + y * perspective, z };
     };
 
@@ -295,8 +284,8 @@ export function PrecisionOrbitalPoster() {
       context.lineWidth = 1;
       context.lineCap = "round";
 
+      const ringPhase = elapsed * ((Math.PI * 2) / 40);
       rings.forEach((ring, ringIndex) => {
-        const ringPhase = ring.direction * elapsed * ((Math.PI * 2) / ring.duration);
         context.beginPath();
         for (let step = 0; step <= 120; step += 1) {
           const angle = (step / 120) * Math.PI * 2;
@@ -305,21 +294,33 @@ export function PrecisionOrbitalPoster() {
           else context.lineTo(point.x, point.y);
         }
         context.closePath();
-        context.strokeStyle = ringIndex === 0 ? "rgba(240,217,140,0.30)" : ringIndex === 1 ? "rgba(240,217,140,0.28)" : "rgba(240,217,140,0.26)";
+        const ringGradient = context.createLinearGradient(38, 150, 262, 150);
+        ringGradient.addColorStop(0, ringIndex === 1 ? "rgba(240,217,140,0.18)" : "rgba(240,217,140,0.24)");
+        ringGradient.addColorStop(0.38, "rgba(240,217,140,0.42)");
+        ringGradient.addColorStop(0.72, "rgba(255,247,218,0.16)");
+        ringGradient.addColorStop(1, "rgba(240,217,140,0.08)");
+        context.save();
+        context.filter = "drop-shadow(0 0 8px rgba(240,217,140,0.25))";
+        context.strokeStyle = ringGradient;
+        context.lineWidth = 1;
         context.stroke();
+        context.restore();
 
-        if (ringIndex < 2) {
-          const nodeAngle = ring.phase + ringPhase * 0.9;
-          const node = project(ring, nodeAngle, pointerCurrent.current, ringPhase);
-          context.save();
-          context.shadowColor = "#F0D98C";
-          context.shadowBlur = 12;
-          context.beginPath();
+        const nodeAngle = ring.phase + elapsed * ((Math.PI * 2) / (24 + ringIndex * 4));
+        const node = project(ring, nodeAngle, pointerCurrent.current, ringPhase);
+        context.save();
+        context.shadowColor = ring.color;
+        context.shadowBlur = ring.node === "square" ? 10 : 14;
+        context.fillStyle = ring.color;
+        context.globalAlpha = 0.96;
+        context.beginPath();
+        if (ring.node === "square") {
+          context.rect(node.x - 3.5, node.y - 3.5, 7, 7);
+        } else {
           context.arc(node.x, node.y, 3.5, 0, Math.PI * 2);
-          context.fillStyle = "#F0D98C";
-          context.fill();
-          context.restore();
         }
+        context.fill();
+        context.restore();
       });
 
       frame = window.requestAnimationFrame(draw);
@@ -352,25 +353,55 @@ export function PrecisionOrbitalPoster() {
   return (
     <motion.div
       className="hero-art relative isolate overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0c]/90 p-6 backdrop-blur-md"
-      style={{ rotateX, rotateY, transformPerspective: 1000 }}
+      style={{
+        rotateX,
+        rotateY,
+        transformPerspective: 1000,
+        backgroundImage: "radial-gradient(circle at 50% 50%, rgba(211,174,55,0.12) 0%, rgba(211,174,55,0.055) 10%, rgba(30,21,42,0.62) 38%, rgba(10,10,12,0.96) 76%, #0A0A0C 100%)",
+      }}
       onPointerMove={handlePointerMove}
       onPointerLeave={resetPointer}
     >
+      <div
+        className="pointer-events-none absolute inset-0 z-0 opacity-[0.04]"
+        style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.18) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+          maskImage: "radial-gradient(circle at center, black 0%, transparent 78%)",
+          WebkitMaskImage: "radial-gradient(circle at center, black 0%, transparent 78%)",
+        }}
+      />
+      <div className="pointer-events-none absolute left-[18%] top-[24%] z-[1] text-[9px] leading-none text-[#F0D98C]/30">+</div>
+      <div className="pointer-events-none absolute right-[18%] top-[31%] z-[1] text-[7px] leading-none text-white/25">*</div>
+      <div className="pointer-events-none absolute bottom-[26%] left-[12%] z-[1] text-[8px] leading-none text-[#B59CFF]/20">+</div>
+      <div className="pointer-events-none absolute bottom-[22%] right-[24%] z-[1] text-[6px] leading-none text-[#66E2A3]/25">·</div>
+      <div className="absolute left-2 top-2 size-3 border-l border-t border-white/15" />
+      <div className="absolute right-2 top-2 size-3 border-r border-t border-white/15" />
+      <div className="absolute bottom-2 left-2 size-3 border-b border-l border-white/15" />
+      <div className="absolute bottom-2 right-2 size-3 border-b border-r border-white/15" />
       <div className="absolute left-6 top-5 z-[4] text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-300">DESIGNING WITH INTENTION</div>
       <div className="absolute right-6 top-5 z-[4] flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-zinc-400">
-        <span className="text-[8px] text-[#F0D98C] shadow-[0_0_8px_rgba(240,217,140,.7)]">●</span> LIVE
+        <motion.span
+          className="size-2 rounded-full bg-[#66E2A3] shadow-[0_0_10px_rgba(102,226,163,.85)]"
+          animate={shouldReduceMotion ? undefined : { opacity: [1, 0.35, 1], scale: [1, 0.78, 1] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        /> LIVE
       </div>
 
       <div className="absolute inset-[52px_24px_46px] z-[2] [perspective:1000px] [transform-style:preserve-3d]">
-        <div className="absolute left-1/2 top-1/2 size-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F0D98C]/15 blur-2xl" />
+        <div className="absolute left-1/2 top-1/2 size-36 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#D3AE37]/10 blur-[28px]" />
 
         <canvas
           ref={canvasRef}
           className="absolute inset-0 h-full w-full"
+          style={{ filter: "drop-shadow(0 0 8px rgba(240,217,140,0.22))" }}
           role="img"
           aria-label="Three precisely centered intersecting orbital paths"
         />
-        <div className="absolute left-1/2 top-1/2 z-[3] -translate-x-1/2 -translate-y-1/2 select-none bg-gradient-to-br from-white via-[#F0D98C] to-[#D3AE37] bg-clip-text text-center font-semibold text-[38px] leading-none tracking-[-0.09em] text-transparent">
+        <div
+          className="absolute left-1/2 top-1/2 z-[3] -translate-x-1/2 -translate-y-1/2 select-none bg-gradient-to-br from-white via-[#F0D98C] to-[#D3AE37] bg-clip-text text-center font-semibold text-[38px] leading-none tracking-[-0.09em] text-transparent"
+          style={{ filter: "drop-shadow(0 0 14px rgba(240,217,140,0.34))", textShadow: "0 0 18px rgba(240,217,140,0.32)" }}
+        >
           YH.
         </div>
       </div>

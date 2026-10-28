@@ -30,12 +30,10 @@ import {
   handleCardPointerLeave,
   handleCardPointerMove,
   KineticLine,
-  OrbitingNode,
+  PrecisionOrbitalPoster,
   Preloader,
   handleMagneticPointerLeave,
   handleMagneticPointerMove,
-  handlePosterPointerLeave,
-  handlePosterPointerMove,
 } from "./components/motion-experience";
 
 const navItems = [
@@ -199,7 +197,7 @@ const projects: Project[] = [
     symbol: "a",
   },
   {
-    index: "05",
+    index: "08",
     category: "UI/UX & Figma",
     artwork: "dashboard",
     name: "SaaS Dashboard UI",
@@ -207,11 +205,12 @@ const projects: Project[] = [
     description:
       "A data-rich dark interface concept exploring dashboard hierarchy, legible metrics, and clear paths from overview to action.",
     tags: ["Figma", "UI Systems", "Dashboard"],
+    cover: "/projects/dashboard.png",
     visual: "project-visual--dashboard",
     symbol: "D",
   },
   {
-    index: "06",
+    index: "05",
     category: "UI/UX & Figma",
     artwork: "editorial",
     name: "Website Reimagination I",
@@ -219,11 +218,14 @@ const projects: Project[] = [
     description:
       "An editorial web redesign study focused on a distinctive typographic voice, intentional spacing, and a calmer browsing rhythm.",
     tags: ["Figma", "Art Direction", "Web"],
+    cover: "/projects/website-reimaginationI.png",
+    href: "https://yashikahidau.github.io/ReimaginedResponsiveActionglowWebsiteUI/",
+    sourceHref: "https://github.com/yashikahidau/ReimaginedResponsiveActionglowWebsiteUI",
     visual: "project-visual--editorial",
     symbol: "I",
   },
   {
-    index: "07",
+    index: "06",
     category: "UI/UX & Figma",
     artwork: "editorial-alt",
     name: "Website Reimagination II",
@@ -231,11 +233,14 @@ const projects: Project[] = [
     description:
       "A second redesign exploration pairing expressive image composition with a practical, responsive page structure.",
     tags: ["Figma", "Responsive Design", "Web"],
+    cover: "/projects/website-reimaginationII.png",
+    href: "https://yashikahidau.github.io/ReimaginedLettuceGrowUI/",
+    sourceHref: "https://github.com/yashikahidau/ReimaginedLettuceGrowUI",
     visual: "project-visual--editorial-alt",
     symbol: "II",
   },
   {
-    index: "08",
+    index: "07",
     category: "UI/UX & Figma",
     artwork: "commerce",
     name: "E-commerce Product Page UI",
@@ -243,6 +248,7 @@ const projects: Project[] = [
     description:
       "A product-page concept balancing a bold product presentation with concise details and clear conversion paths.",
     tags: ["Figma", "E-commerce", "Conversion UX"],
+    cover: "/projects/commerce-product.png",
     visual: "project-visual--commerce",
     symbol: "P",
   },
@@ -250,11 +256,23 @@ const projects: Project[] = [
     index: "09",
     category: "Visual Design",
     artwork: "brand",
-    name: "Woodland Advertisement & Bajaj Banner",
-    kind: "VISUAL DESIGN · CAMPAIGN STUDIES",
-    description:
-      "A pair of campaign explorations featuring a Woodland outdoor advertisement direction and a bold Bajaj banner study.",
+    name: "Woodland Advertisement",
+    kind: "VISUAL DESIGN · CAMPAIGN STUDY",
+    description: "An outdoor advertisement direction for Woodland, shaped around its adventurous identity.",
     tags: ["Photoshop", "Illustrator", "Campaign Design"],
+    cover: "/projects/woodland-ad.png",
+    visual: "project-visual--brand",
+    symbol: "W",
+  },
+  {
+    index: "10",
+    category: "Visual Design",
+    artwork: "brand",
+    name: "Bajaj Banner",
+    kind: "VISUAL DESIGN · CAMPAIGN STUDY",
+    description: "A bold banner study for Bajaj, designed to bring energy and clarity to the campaign message.",
+    tags: ["Photoshop", "Illustrator", "Campaign Design"],
+    cover: "/projects/bajaj.png",
     visual: "project-visual--brand",
     symbol: "B",
   },
@@ -325,7 +343,7 @@ export default function Home() {
     : { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const };
   const visibleProjects = projects.filter(
     (project) => projectFilter === "All" || project.category === projectFilter,
-  );
+  ).sort((a, b) => Number(a.index) - Number(b.index));
 
   useEffect(() => {
     const preloaderSeen = "yashika-portfolio-preloader-seen";
@@ -476,40 +494,7 @@ export default function Home() {
             transition={{ ...transition, delay: shouldReduceMotion ? 0 : 0.12 }}
             aria-hidden="true"
           >
-            <div
-              className="hero-art"
-              onPointerMove={handlePosterPointerMove}
-              onPointerLeave={handlePosterPointerLeave}
-            >
-              <div className="hero-art-spotlight" />
-              <div className="hero-art-surface">
-                <div className="hero-art-grid" />
-                <svg className="hero-orbits" viewBox="0 0 400 450" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="orbitStroke" x1="30" y1="225" x2="370" y2="225" gradientUnits="userSpaceOnUse">
-                      <stop offset="0" stopColor="#D3AE37" stopOpacity=".58" />
-                      <stop offset=".5" stopColor="#FFFFFF" stopOpacity=".15" />
-                      <stop offset="1" stopColor="#D3AE37" stopOpacity=".42" />
-                    </linearGradient>
-                  </defs>
-                  <ellipse className="hero-orbit hero-orbit--one" cx="200" cy="225" rx="148" ry="66" transform="rotate(0 200 225)" />
-                  <ellipse className="hero-orbit hero-orbit--two" cx="200" cy="225" rx="136" ry="54" transform="rotate(60 200 225)" />
-                  <ellipse className="hero-orbit hero-orbit--three" cx="200" cy="225" rx="124" ry="46" transform="rotate(-60 200 225)" />
-                  <OrbitingNode centerX={200} centerY={225} radiusX={148} radiusY={66} rotation={0} duration={28000} className="orbit-node--gold" />
-                  <OrbitingNode centerX={200} centerY={225} radiusX={136} radiusY={54} rotation={60} duration={36000} phase={0.34} className="orbit-node--violet" />
-                  <OrbitingNode centerX={200} centerY={225} radiusX={124} radiusY={46} rotation={-60} duration={44000} phase={0.68} className="orbit-node--gold" />
-                </svg>
-                <div className="hero-art-caption">
-                  <span>DESIGNING WITH</span>
-                  <span>INTENTION <i>✳</i></span>
-                </div>
-                <div className="hero-core-glow" />
-                <div className="hero-monogram">Y<span>H</span><i>.</i></div>
-                <div className="hero-art-index">01 — 05</div>
-                <span className="hero-art-star hero-art-star--a">✳</span>
-                <span className="hero-art-star hero-art-star--b">✦</span>
-              </div>
-            </div>
+            <PrecisionOrbitalPoster />
           </motion.div>
           <div className="hero-bottom-rule" />
           <span className="hero-index">PORTFOLIO <span>©</span> 2026</span>
@@ -672,10 +657,10 @@ export default function Home() {
                             </div>
                           </div>
                         </div>
-                        {project.artwork === "brand" && <div className="artwork-brand-labels"><span>WOODLAND</span><span>BAJAJ</span></div>}
+                        {project.artwork === "brand" && <div className="artwork-brand-labels"><span>{project.name.startsWith("Woodland") ? "WOODLAND" : "BAJAJ"}</span></div>}
                       </div>
                     )}
-                    <span className="project-index">{project.index} <span>/ 09</span></span>
+                    <span className="project-index">{project.index} <span>/ 10</span></span>
                     {project.cover && <span className="project-symbol">{project.symbol}</span>}
                     <span className="project-visual-label">{project.kind}</span>
                     {project.href ? (

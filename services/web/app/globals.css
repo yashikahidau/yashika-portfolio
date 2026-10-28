@@ -201,43 +201,13 @@ main { position: relative; isolation: isolate; }
   position: absolute; width: clamp(310px, 37vw, 445px); height: clamp(370px, 43vw, 505px); right: 0; top: 50%; transform: translateY(-46%);
 }
 .hero-art {
-  position: relative; width: 100%; height: 100%; perspective: 1000px;
-  overflow: hidden; border: 1px solid rgba(255,255,255,.13);
-  --poster-glow-x: 50%;
-  --poster-glow-y: 50%;
-  --poster-tilt-x: 0deg;
-  --poster-tilt-y: 0deg;
-  transform: perspective(1000px) rotateX(var(--poster-tilt-x)) rotateY(var(--poster-tilt-y));
-  transition: transform .36s cubic-bezier(.2,.7,.2,1);
-  background:
-    radial-gradient(ellipse at 50% 44%, rgba(204,168,106,.16), transparent 35%),
-    radial-gradient(ellipse at 70% 30%, rgba(100,72,127,.28), transparent 47%),
-    linear-gradient(145deg, #17171c, #0c0d11 70%);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 1000px;
   transform-style: preserve-3d;
+  background: rgba(10,10,12,.90);
 }
-.hero-art::before, .hero-art::after { position: absolute; content: ""; pointer-events: none; }
-.hero-art::before { inset: 17px; border: 1px solid rgba(255,255,255,.09); }
-.hero-art::after { top: 50%; left: 50%; width: 67%; aspect-ratio: 1; border: 1px solid rgba(240,217,140,.18); border-radius: 50%; transform: translate(-50%,-50%); box-shadow: 0 0 70px rgba(240,217,140,.07), inset 0 0 70px rgba(240,217,140,.04); }
-.hero-art-surface { position: absolute; inset: 0; transform-style: preserve-3d; }
-.hero-art-spotlight { position: absolute; z-index: 3; inset: 0; pointer-events: none; background: radial-gradient(240px circle at var(--poster-glow-x) var(--poster-glow-y), rgba(211,174,55,.16), rgba(139,92,246,.08) 36%, transparent 72%); mix-blend-mode: screen; }
-.hero-art-grid { position: absolute; inset: 0; opacity: .2; background-image: linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(transparent, black 24%, black 80%, transparent); }
-.hero-orbits { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.hero-orbit { fill: none; stroke: url("#orbitStroke"); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.hero-orbit--two { opacity: .88; }
-.hero-orbit--three { opacity: .76; }
-.orbit-node { stroke: rgba(255,255,255,.85); stroke-width: 1; }
-.orbit-node--gold { fill: #d3ae37; filter: drop-shadow(0 0 5px rgba(211,174,55,.9)); }
-.orbit-node--violet { fill: #8b5cf6; filter: drop-shadow(0 0 6px rgba(139,92,246,.95)); }
-.hero-core-glow { position: absolute; z-index: 1; top: 48%; left: 50%; width: 145px; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%,-50%); background: radial-gradient(circle, rgba(240,217,140,.14), rgba(139,92,246,.08) 40%, transparent 72%); filter: blur(13px); pointer-events: none; }
-.hero-monogram { position: absolute; z-index: 2; top: 48%; left: 50%; transform: translate(-50%,-50%); font: 120px/.8 var(--serif); letter-spacing: -.13em; color: var(--gold-light); text-shadow: 0 6px 42px rgba(240,217,140,.22); }
-.hero-monogram span { font-style: italic; color: var(--gold-light); }
-.hero-monogram i { font-style: normal; color: var(--gold); font-size: 67px; }
-.hero-art-caption { position: absolute; z-index: 2; top: 34px; left: 35px; display: grid; gap: 6px; font-size: 11px; letter-spacing: .16em; color: #c7c5c0; }
-.hero-art-caption i { padding-left: 6px; color: var(--gold); font-style: normal; font-size: 14px; }
-.hero-art-index { position: absolute; z-index: 2; bottom: 31px; right: 34px; color: #c7c5c0; letter-spacing: .14em; font-size: 11px; }
-.hero-art-star { position: absolute; z-index: 2; color: var(--gold-light); }
-.hero-art-star--a { top: 25%; right: 21%; font-size: 15px; opacity: .8; }
-.hero-art-star--b { bottom: 23%; left: 18%; font-size: 12px; color: #cbbce1; }
 .hero-bottom-rule { position: absolute; bottom: 51px; left: 0; right: 0; height: 1px; background: var(--line); }
 .hero-index { position: absolute; bottom: 27px; right: 0; font-size: 11px; letter-spacing: .14em; color: #c7c5c0; }
 .hero-index span { color: var(--gold); }
